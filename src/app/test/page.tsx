@@ -27,6 +27,7 @@ export default function TestPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [unansweredMsg, setUnansweredMsg] = useState<string | null>(null);
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -276,10 +277,158 @@ export default function TestPage() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button
+                onClick={() => setShowReview(true)}
+                className="btn-primary flex-1 py-4 text-base"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Ver Respuestas
+              </button>
+              <button
                 onClick={() => {
                   setCurrentQuestion(0);
                   setSelectedAnswers({});
                   setShowResult(false);
+                  setShowReview(false);
+                  setSelectedQuestions(shuffleArray(allQuestions).slice(0, TOTAL_QUESTIONS));
+                }}
+                className="btn-secondary flex-1 py-4 text-base"
+              >
+                Repetir Test
+              </button>
+            </div>
+            <div className="mt-4">
+              <Link href="/" className="btn-secondary w-full py-4 text-base text-center block">
+                Volver al Inicio
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (showReview) {
+    const correctCount = calculateScore() / POINTS_PER_QUESTION;
+
+    return (
+      <div className="page-bg">
+        <header className="app-header sticky top-0 z-30">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <button
+              onClick={() => setShowReview(false)}
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="text-sm font-medium">Volver al Resultado</span>
+            </button>
+            <h1 className="text-base font-semibold text-white">Revisar Respuestas</h1>
+            <div className="text-sm text-gray-400 font-medium">
+              {correctCount}/{TOTAL_QUESTIONS} correctas
+            </div>
+          </div>
+        </header>
+
+        <main className="w-full px-6 py-10">
+          <div className="max-w-3xl mx-auto space-y-6">
+            {selectedQuestions.map((q, index) => {
+              const userAnswer = selectedAnswers[index];
+              const isCorrect = userAnswer === q.correctAnswer;
+
+              return (
+                <div key={index} className="glass-card p-6">
+                  {/* Question header */}
+                  <div className="flex items-start gap-4 mb-5">
+                    <span className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold ${
+                      isCorrect ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"
+                    }`}>
+                      {isCorrect ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                    </span>
+                    <div className="flex-1">
+                      <span className="inline-block px-3 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium mb-2">
+                        {q.topic}
+                      </span>
+                      <p className="text-white font-medium">{q.text}</p>
+                    </div>
+                  </div>
+
+                  {/* Options */}
+                  <div className="space-y-2.5 mb-4">
+                    {q.options.map((option, optIndex) => {
+                      const isCorrectOption = optIndex === q.correctAnswer;
+                      const isUserChoice = optIndex === userAnswer;
+
+                      let styles = "bg-white/[0.03] border-white/[0.08] text-gray-400";
+                      if (isCorrectOption) {
+                        styles = "bg-green-500/10 border-green-500/30 text-green-400";
+                      } else if (isUserChoice && !isCorrect) {
+                        styles = "bg-red-500/10 border-red-500/30 text-red-400 line-through";
+                      }
+
+                      return (
+                        <div
+                          key={optIndex}
+                          className={`w-full text-left p-4 rounded-xl border flex items-center gap-3 ${styles}`}
+                        >
+                          <span className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold border ${
+                            isCorrectOption
+                              ? "bg-green-500 border-green-500 text-white"
+                              : isUserChoice && !isCorrect
+                                ? "bg-red-500 border-red-500 text-white"
+                                : "border-white/20 text-gray-500"
+                          }`}>
+                            {String.fromCharCode(65 + optIndex)}
+                          </span>
+                          <span className="text-sm font-medium">{option}</span>
+                          {isCorrectOption && (
+                            <svg className="w-4 h-4 text-green-400 ml-auto shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                          {isUserChoice && !isCorrect && (
+                            <svg className="w-4 h-4 text-red-400 ml-auto shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Feedback - only shown when answer is wrong */}
+                  {!isCorrect && (
+                    <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/15">
+                      <div className="flex items-start gap-2.5">
+                        <svg className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-sm text-blue-300 leading-relaxed">{q.explanation}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Bottom actions */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 pb-10">
+              <button
+                onClick={() => {
+                  setCurrentQuestion(0);
+                  setSelectedAnswers({});
+                  setShowResult(false);
+                  setShowReview(false);
                   setSelectedQuestions(shuffleArray(allQuestions).slice(0, TOTAL_QUESTIONS));
                 }}
                 className="btn-primary flex-1 py-4 text-base"
