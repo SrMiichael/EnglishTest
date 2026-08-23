@@ -277,7 +277,7 @@ export default function TestPage() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={() => setShowReview(true)}
+                onClick={() => { setShowReview(true); setShowResult(false); }}
                 className="btn-primary flex-1 py-4 text-base"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@ export default function TestPage() {
         <header className="app-header sticky top-0 z-30">
           <div className="px-6 py-4 flex items-center justify-between">
             <button
-              onClick={() => setShowReview(false)}
+              onClick={() => { setShowReview(false); setShowResult(true); }}
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
